@@ -3,12 +3,16 @@
         <input v-model="numButtons" type="number" placeholder="Número de botones" />
         <button @click="createButtons">Crear botones</button>
         <div id="buttonContainer">
-            <button v-for="buttonIndex in numButtons" :key="buttonIndex" @click="toggleBox(buttonIndex)">
-                Botón {{ buttonIndex }}
+            <button v-for="(button, buttonIndex) in buttonTexts" :key="buttonIndex" @click="toggleBox(buttonIndex)">
+                {{ button.text }}
             </button>
         </div>
-        <div :class="{ test: isBoxExpanded }" id="testbox">
-            <div v-for="(savedText, index) in savedTexts" :key="index">{{ savedText }}</div>
+        <div :class="{ test: isBoxExpanded !== -1 }" id="testbox">
+            <div v-for="(button, index) in buttonTexts" :key="index">
+                <div v-if="index === isBoxExpanded">
+                    <div v-for="(savedText, textIndex) in button.savedTexts" :key="textIndex">{{ savedText }}</div>
+                </div>
+            </div>
         </div>
         <textarea v-model="textAreaValue" placeholder="Introduce tu texto aquí"></textarea>
         <button @click="saveTextArea">Guardar texto</button>
@@ -20,23 +24,27 @@
 import { ref } from 'vue';
 
 const numButtons = ref(0);
-const isBoxExpanded = ref(false);
+const isBoxExpanded = ref(-1);
 const textAreaValue = ref('');
 const buttonTexts = ref([]);
-const savedTexts = ref([]);
 
 const toggleBox = (buttonIndex) => {
-    isBoxExpanded.value = !isBoxExpanded.value;
-    console.log(`Botón ${buttonIndex} clicado`);
+    isBoxExpanded.value = isBoxExpanded.value === buttonIndex ? -1 : buttonIndex;
+    console.log(`Botón ${buttonIndex + 1} clicado`);
 };
 
 const createButtons = () => {
-    buttonTexts.value = Array.from({ length: numButtons.value }, (_, index) => `Botón ${index + 1}`);
+    buttonTexts.value = Array.from({ length: numButtons.value }, (_, index) => ({
+        text: `Botón ${index + 1}`,
+        savedTexts: [],
+    }));
 };
 
 const saveTextArea = () => {
-    savedTexts.value.push(textAreaValue.value);
-    textAreaValue.value = '';
+    if (isBoxExpanded.value !== -1) {
+        buttonTexts.value[isBoxExpanded.value].savedTexts.push(textAreaValue.value);
+        textAreaValue.value = '';
+    }
 };
 
 const loadFile = (event) => {
@@ -44,7 +52,9 @@ const loadFile = (event) => {
     if (file) {
         const reader = new FileReader();
         reader.onload = (e) => {
-            textAreaValue.value = e.target.result;
+            if (isBoxExpanded.value !== -1) {
+                buttonTexts.value[isBoxExpanded.value].savedTexts.push(e.target.result);
+            }
         };
         reader.readAsText(file);
     }
