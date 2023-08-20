@@ -12,6 +12,7 @@
         </div>
         <textarea v-model="textAreaValue" placeholder="Introduce tu texto aquí"></textarea>
         <button @click="saveTextArea">Guardar texto</button>
+        <input type="file" @change="loadFile" accept=".sh,.py,.js" />
     </div>
 </template>
 
@@ -36,6 +37,17 @@ const createButtons = () => {
 const saveTextArea = () => {
     savedTexts.value.push(textAreaValue.value);
     textAreaValue.value = '';
+};
+
+const loadFile = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            textAreaValue.value = e.target.result;
+        };
+        reader.readAsText(file);
+    }
 };
 </script>
 
