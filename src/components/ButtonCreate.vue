@@ -7,7 +7,9 @@
                 Botón {{ buttonIndex }}
             </button>
         </div>
-        <div :class="{ test: isBoxExpanded }" id="testbox">{{ savedText }}</div>
+        <div :class="{ test: isBoxExpanded }" id="testbox">
+            <div v-for="(savedText, index) in savedTexts" :key="index">{{ savedText }}</div>
+        </div>
         <textarea v-model="textAreaValue" placeholder="Introduce tu texto aquí"></textarea>
         <button @click="saveTextArea">Guardar texto</button>
     </div>
@@ -20,7 +22,7 @@ const numButtons = ref(0);
 const isBoxExpanded = ref(false);
 const textAreaValue = ref('');
 const buttonTexts = ref([]);
-const savedText = ref('');
+const savedTexts = ref([]);
 
 const toggleBox = (buttonIndex) => {
     isBoxExpanded.value = !isBoxExpanded.value;
@@ -32,7 +34,7 @@ const createButtons = () => {
 };
 
 const saveTextArea = () => {
-    savedText.value = textAreaValue.value;
+    savedTexts.value.push(textAreaValue.value);
     textAreaValue.value = '';
 };
 </script>
@@ -41,13 +43,12 @@ const saveTextArea = () => {
 #testbox {
     opacity: 0;
     width: 300px;
-    height: 0px;
     background-color: blue;
+    padding: 10px;
 }
 
 #testbox.test {
     opacity: 1;
-    height: 300px;
-    transition: opacity 1s ease-in-out, height 0.5s ease-in-out;
+    transition: opacity 1s ease-in-out;
 }
 </style>
